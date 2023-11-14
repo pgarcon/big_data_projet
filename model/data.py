@@ -6,8 +6,9 @@ from model.hourly import Hourly
 
 class Data:
 
-    def __init__(self):
+    def __init__(self, token):
         self.response = WeatherResponse()
+        self.token = token
 
 
 
@@ -21,7 +22,7 @@ class Data:
             'stations[]' : '000AC',
             'start' : '2023-11-12',
             'end' : '2023-11-14',
-            'token' : 'd6IjJeVwkRDpv0yBBrJgIl6Kge9zAp6HubW1p1qh9QMUy1eDXnsHLw'
+            'token' : self.token
         }
 
         print("Request to : ", url)
