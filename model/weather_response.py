@@ -1,6 +1,6 @@
-from station import Station
-from station_datas import StationDatas
-from hourly import Hourly
+from model.station import Station
+from model.station_datas import StationDatas
+from model.hourly import Hourly
 
 class WeatherResponse:
     def __init__(self):
@@ -13,11 +13,18 @@ class WeatherResponse:
         else:
             raise ValueError("L'objet ajouté n'est pas une instance de la classe Station")
 
-    def add_hourly(self, data, id_station):
+    def add_hourly(self, hourly):
         if isinstance(hourly, Hourly):
-            self.hourly.add_data(id_station, hourly)
+            self.hourly.append(hourly)
         else:
             raise ValueError("L'objet ajouté n'est pas une instance de la classe StationData")
 
     def __str__(self):
         return f"WeatherData(stations={self.stations}, station_data={self.hourly})"
+    
+
+    def getAllHourly(self):
+        return self.hourly
+    
+    def getHourly(self, index):
+        return self.hourly[index]
