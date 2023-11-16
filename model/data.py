@@ -1,4 +1,6 @@
 import requests
+import pandas as pd
+import json
 from model.weather_response import WeatherResponse
 from model.station import Station
 from model.station_datas import StationDatas
@@ -12,18 +14,20 @@ class Data:
 
 
 
-    def sendResquest(self):
+    def sendResquest(self, tableau_id):
         url = 'https://www.infoclimat.fr/opendata/'
 
         # Si vous avez des paramètres à inclure dans la requête, vous pouvez les spécifier dans le dictionnaire params
         params = {
             'method' : 'get',
             'format' : 'json',
-            'stations[]' : '000AC',
+            'stations[]' : tableau_id,
             'start' : '2023-11-12',
             'end' : '2023-11-14',
             'token' : self.token
         }
+
+        print(params)
 
         print("Request to : ", url)
         # Envoi de la requête GET avec des paramètres
@@ -53,26 +57,73 @@ class Data:
             print("Hourly extraction...")
             # Extraction des données horaires
             hourly_data = json_response.get("hourly", {})
+            hr = Hourly()
             for id_station, hourly_data in hourly_data.items():
-                for data in hourly_data:
-                    #c'est l'objet param, ça nous interesse pas
-                    if isinstance(data, str):
-                        print(data, "is not interesting")
-                    else:
-                        sd = StationDatas(data)
-                        hr = Hourly(st.getId(), sd)
-                        print("Hourly extracted : ", hr)
-                        self.response.add_hourly(hr)
+                #print("\n", hourly_data)
+                hr.add_data(id_station, hourly_data)
+            self.response.add_hourly(hr)
 
-            
-            #print(json_response)
+            file_path = "./reponseAPI.json"
+            # Ouvrez le fichier en mode écriture
+            with open(file_path, 'w') as json_file:
+                # Utilisez json.dump pour écrire le dictionnaire dans le fichier JSON
+                json.dump(json_response, json_file, indent=4)
         else:
             print('Erreur lors de la requête. Code de statut :', response.status_code)
             print('Contenu de la réponse :', response.text)
 
-        return self.response
+        liste_data = []
+
+        for id in self.response.getHourly().getData():
+            for i in range(self.response.getHourly().getSizeOf(id)):
+                #print(reponse.getHourly().getStationsData(id, i))
+                liste_data.append(self.response.getHourly().getStationsData(id, i))
 
 
+        #print(liste_data)
+
+
+        data = {
+            'id_station': [station.id_station for station in liste_data],
+            'dh_utc': [station.dh_utc for station in liste_data],
+            'temperature': [station.temperature for station in liste_data],
+            'pressure': [station.pressure for station in liste_data],
+            'humidity': [station.humidity for station in liste_data],
+            'dew_point': [station.dew_point for station in liste_data],
+            'wind_speed': [station.wind_speed for station in liste_data],
+            'wind_gusts': [station.wind_gusts for station in liste_data],
+            'wind_direction': [station.wind_direction for station in liste_data],
+            'rain_3h': [station.rain_3h for station in liste_data],
+            'rain_1h': [station.rain_1h for station in liste_data],
+        }
+
+        df = pd.DataFrame(data)
+
+        return df
+
+
+    def requestAllStations(self):
+        url = "https://www.infoclimat.fr/opendata/stations_xhr.php?format=geojson"
+
+        print("Request to : ", url)
+        response = requests.get(url)
+        print("Request end to ", url)
+
+        if response.status_code == 200:
+            # Traitement de la réponse JSON
+            print("#### Status OK")
+            json_response = response.json()
+
+            #print(json_response)
+
+            tab_request = []
+            feature =  json_response.get("features", [])
+            for station in feature:
+                if(station.get("properties").get("country") == "FR"):
+                    #print(station.get("id"))
+                    tab_request.append(station.get("properties").get("id"))
+
+            return self.sendResquest(tab_request)
 
     def getData(self):
         return self.response

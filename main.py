@@ -1,13 +1,10 @@
 from model.data import Data
+import pandas as pd
 from model.weather_response import WeatherResponse
 
-donnee = Data(token='d6IjJeVwkRDpv0yBBrJgIl6Kge9zAp6HubW1p1qh9QMUy1eDXnsHLw')
+donnee = Data(token='CHDuxKEEdnwFpY3RbJPZAWdTNoLBKK7Q3tg90D0lukS0dgBAh1Qw')
 
-reponse = donnee.sendResquest()
+reponse = donnee.requestAllStations()
 
+print(reponse)
 
-print("\n\n#### RESPONSE API ####\n\n")
-
-##OK
-for hourly in reponse.getAllHourly():
-    print(hourly)

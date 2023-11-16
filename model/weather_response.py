@@ -5,7 +5,7 @@ from model.hourly import Hourly
 class WeatherResponse:
     def __init__(self):
         self.stations = []
-        self.hourly = []
+        self.hourly = None
 
     def add_station(self, station):
         if isinstance(station, Station):
@@ -15,7 +15,7 @@ class WeatherResponse:
 
     def add_hourly(self, hourly):
         if isinstance(hourly, Hourly):
-            self.hourly.append(hourly)
+            self.hourly = hourly
         else:
             raise ValueError("L'objet ajouté n'est pas une instance de la classe StationData")
 
@@ -23,8 +23,6 @@ class WeatherResponse:
         return f"WeatherData(stations={self.stations}, station_data={self.hourly})"
     
 
-    def getAllHourly(self):
+    def getHourly(self):
         return self.hourly
     
-    def getHourly(self, index):
-        return self.hourly[index]
