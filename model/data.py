@@ -27,8 +27,6 @@ class Data:
             'token' : self.token
         }
 
-        print(params)
-
         print("Request to : ", url)
         # Envoi de la requête GET avec des paramètres
         response = requests.get(url, params=params)
@@ -43,6 +41,8 @@ class Data:
         # Vérification du statut de la réponse
         if response.status_code == 200:
             # Traitement de la réponse JSON
+
+            #print("#### message : ", print(response.text), " #### \n")
             print("#### Status OK")
             json_response = response.json()
 
@@ -51,7 +51,7 @@ class Data:
             stations = json_response.get("stations", [])
             for station in stations:
                 st = Station(station)
-                print("Station extract : \n[\n", st, "\n]\n")
+                #print("Station extract : \n[\n", st, "\n]\n")
                 self.response.add_station(st)
 
             print("Hourly extraction...")
@@ -63,11 +63,6 @@ class Data:
                 hr.add_data(id_station, hourly_data)
             self.response.add_hourly(hr)
 
-            file_path = "./reponseAPI.json"
-            # Ouvrez le fichier en mode écriture
-            with open(file_path, 'w') as json_file:
-                # Utilisez json.dump pour écrire le dictionnaire dans le fichier JSON
-                json.dump(json_response, json_file, indent=4)
         else:
             print('Erreur lors de la requête. Code de statut :', response.status_code)
             print('Contenu de la réponse :', response.text)

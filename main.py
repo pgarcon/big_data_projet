@@ -1,10 +1,9 @@
-from model.data import Data
-import pandas as pd
-from model.weather_response import WeatherResponse
+from model.kafka.producer import ProducerClass
+from model.kafka.consumer import ConsumerClass
 
-donnee = Data(token='CHDuxKEEdnwFpY3RbJPZAWdTNoLBKK7Q3tg90D0lukS0dgBAh1Qw')
+print("#### Main is running...")
+mw = ProducerClass()
+cs = ConsumerClass()
 
-reponse = donnee.requestAllStations()
 
-print(reponse)
-
+mw.produce()
