@@ -19,4 +19,4 @@ for line in f.readlines():
 gTTS(text=mytext, lang=language, slow=False).save("tts/audio.mp3")
 f.close()
 
-Audio("audio.mp3", autoplay=True)
+Audio("tts/audio.mp3", autoplay=True)
