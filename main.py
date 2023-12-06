@@ -1,9 +1,17 @@
-from model.kafka.producer import ProducerClass
-from model.kafka.consumer import ConsumerClass
+from pyspark.sql import SparkSession
 
-print("#### Main is running...")
-mw = ProducerClass()
-cs = ConsumerClass()
+# Define Spark session
+spark = SparkSession.builder \
+    .appName("MongoDBExample") \
+    .config("spark.mongodb.input.uri", "mongodb://localhost:27019/yourDatabase.yourCollection") \
+    .config("spark.mongodb.output.uri", "mongodb://localhost:27019/yourDatabase.yourCollection") \
+    .getOrCreate()
 
+# Now you can use the 'spark' variable in the rest of your script
+df = spark.read.format("mongo").load()
 
-mw.produce()
+# Perform operations on the DataFrame 'df'
+# ...
+
+# Finally, stop the Spark session when you're done
+spark.stop()
