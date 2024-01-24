@@ -2,6 +2,7 @@ from confluent_kafka import Consumer
 from model.utils import read_ccloud_config
 from model.utils import PROPERTIES_FILE
 
+## TODO : LECTURE PAR BATCH
 class ConsumerClass:
 
     def consumerMessage(self):

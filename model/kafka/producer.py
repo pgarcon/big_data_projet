@@ -4,12 +4,13 @@ from model.data import Data
 import pandas as pd
 from model.utils import read_ccloud_config
 
+## TODO : ECRITURE PAR BATCH
 class ProducerClass:
     
-    def produce(self):
+    def produce(self, date_deb, date_f):
 
         print("### Start producer.")
-        donnee = Data(token="AoPwTySlsJxKUSdz0Rw6v0Soc5wZGtgFS8b6W9KJG8U2DCy494g")
+        donnee = Data(token="AoPwTySlsJxKUSdz0Rw6v0Soc5wZGtgFS8b6W9KJG8U2DCy494g", date_debut=date_deb, date_fin=date_f)
         reponse = donnee.requestAllStations()
 
         producer = Producer(read_ccloud_config(PROPERTIES_FILE))

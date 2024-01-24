@@ -8,9 +8,12 @@ from model.hourly import Hourly
 
 class Data:
 
-    def __init__(self, token):
+    def __init__(self, token, date_debut, date_fin):
         self.response = WeatherResponse()
         self.token = token
+        self.date_debut = date_debut
+        self.date_fin = date_fin
+        self.id_stations = None
 
 
 
@@ -22,8 +25,8 @@ class Data:
             'method' : 'get',
             'format' : 'json',
             'stations[]' : tableau_id,
-            'start' : '2023-11-12',
-            'end' : '2023-11-14',
+            'start' : self.date_debut,
+            'end' : self.date_fin,
             'token' : self.token
         }
 
@@ -37,6 +40,8 @@ class Data:
 
         # Envoi de la requête POST avec des données JSON
         # response = requests.post(url, headers=headers, json=data)
+
+        print(response)
 
         # Vérification du statut de la réponse
         if response.status_code == 200:
@@ -98,26 +103,32 @@ class Data:
 
 
     def requestAllStations(self):
-        url = "https://www.infoclimat.fr/opendata/stations_xhr.php?format=geojson"
+        if(self.id_stations == None):
+            url = "https://www.infoclimat.fr/opendata/stations_xhr.php?format=geojson"
 
-        print("Request to : ", url)
-        response = requests.get(url)
-        print("Request end to ", url)
+            print("Request to : ", url)
+            response = requests.get(url)
+            print("Request end to ", url)
 
-        if response.status_code == 200:
-            # Traitement de la réponse JSON
-            print("#### Status OK")
-            json_response = response.json()
+            if response.status_code == 200:
+                # Traitement de la réponse JSON
+                print("#### Status OK")
+                json_response = response.json()
 
-            #print(json_response)
+                #print(json_response)
 
-            tab_request = []
-            feature =  json_response.get("features", [])
-            for station in feature:
-                if(station.get("properties").get("country") == "FR"):
-                    #print(station.get("id"))
-                    tab_request.append(station.get("properties").get("id"))
+                tab_request = []
+                feature =  json_response.get("features", [])
+                for station in feature:
+                    if(station.get("properties").get("country") == "FR"):
+                        #print(station.get("id"))
+                        tab_request.append(station.get("properties").get("id"))
 
+                self.id_stations = tab_request
+            else:
+                tab_request = self.id_stations
+            
+            
             return self.sendResquest(tab_request)
 
     def getData(self):
