@@ -1,12 +1,18 @@
 from model.mongo.mongodb import Mongodb
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+import pickle
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import LSTM,Dense ,Dropout, Bidirectional
 import pandas as pd
 import numpy as np
+import os
+import tensorflow as tf
+import warnings
+
+
+warnings.filterwarnings("ignore", category=UserWarning, module="keras")
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 class Prediction:
 
@@ -16,6 +22,7 @@ class Prediction:
         self.model = None
         self.x_train = None
         self.y_train = None
+        self.filename = "model_mteo.pkl"
 
         # Connexion à la base de données
         self.mongo.connexion()
@@ -26,8 +33,10 @@ class Prediction:
         data = self.mongo.prepare_data()
         self.mongo.close_connection()
 
-        data = data.sort_values(by='dh_utc')
+        data = data.sort_values(by='dh_utc', ascending=True)
         data = data.drop(['dh_utc'], axis=1)
+
+        print(data)
 
         self.n_future = 4  # next 4 days temperature forecast
         self.n_past = 30  # Past 30 days 
@@ -65,8 +74,8 @@ class Prediction:
         x_test_scaled = self.sc_test.fit_transform(x_test_flat)
         y_test_scaled = self.sc_test.fit_transform(y_test_flat)
 
-        x_train_scaled = np.reshape(x_train_scaled, (x_train_scaled.shape[0], 30, 9))
-        x_test_scaled = np.reshape(x_test_scaled, (x_test_scaled.shape[0], 30, 9))
+        x_train_scaled = np.reshape(x_train_scaled, (x_train_scaled.shape[0], 30, 8))
+        x_test_scaled = np.reshape(x_test_scaled, (x_test_scaled.shape[0], 30, 8))
 
 
         print("x_train shape: ", x_train_scaled.shape)
@@ -83,42 +92,50 @@ class Prediction:
 
     
     def train_model(self): 
-        regressor = Sequential()
-        regressor.add(Bidirectional(LSTM(units=30, return_sequences=True, input_shape = (self.x_train.shape[1],1) ) ))
-        regressor.add(Dropout(0.2))
-        regressor.add(LSTM(units= 30 , return_sequences=True))
-        regressor.add(Dropout(0.2))
-        regressor.add(LSTM(units= 30 , return_sequences=True))
-        regressor.add(Dropout(0.2))
-        regressor.add(LSTM(units= 30))
-        regressor.add(Dropout(0.2))
-        regressor.add(Dense(units = self.n_future * 9,activation='linear'))
-        regressor.compile(optimizer='adam', loss='mean_squared_error',metrics=['acc'])
-        regressor.fit(self.x_train, self.y_train, epochs=1,batch_size=32 )
-        
-        self.model = regressor
+        if not(os.path.exists(self.filename)):
+            regressor = Sequential()
+            regressor.add(Bidirectional(LSTM(units=30, return_sequences=True, input_shape = (self.x_train.shape[1],1) ) ))
+            regressor.add(Dropout(0.2))
+            regressor.add(LSTM(units= 30 , return_sequences=True))
+            regressor.add(Dropout(0.2))
+            regressor.add(LSTM(units= 30 , return_sequences=True))
+            regressor.add(Dropout(0.2))
+            regressor.add(LSTM(units= 30))
+            regressor.add(Dropout(0.2))
+            regressor.add(Dense(units = self.n_future * 8,activation='linear'))
+            regressor.compile(optimizer='adam', loss='mean_squared_error',metrics=['acc'])
+            regressor.fit(self.x_train, self.y_train, epochs=15,batch_size=32 )
+            
+            self.model = regressor
 
-        predicted_temperature = regressor.predict(self.x_test)
-        print(predicted_temperature.shape)
+            with open(self.filename, 'wb') as model_file:
+                pickle.dump(self.model, model_file)
+        else:
+            with open(self.filename, 'rb') as model_file:
+                self.model = pickle.load(model_file)
 
-        print(predicted_temperature)
+
+
+    def predict(self, data=None):
+        data = data.sort_values(by='dh_utc', ascending=True)
+        print("###### data to predict ##### \n", data)
+        data = data.drop(['dh_utc'], axis=1)
+
+        data = data.values.tolist()
+
+        data = np.array(data)
+
+        print("data shape : ", data.shape)
+
+        data = np.reshape(data, (1, 30, 8))
+
+        predicted_temperature = self.model.predict(data)
 
         # Applique inverse_transform sans réorganiser les dimensions
-        predicted_temperature = self.sc_test.inverse_transform(np.reshape(predicted_temperature, (predicted_temperature.shape[0], 36)))
+        predicted_temperature = self.sc_test.inverse_transform(np.reshape(predicted_temperature, (predicted_temperature.shape[0], 32)))
 
         # Applique inverse_transform sans réorganiser les dimensions
-        predicted_temperature = np.reshape(predicted_temperature, (predicted_temperature.shape[0], 4, 9))
+        predicted_temperature = np.reshape(predicted_temperature,  (4, 8))
 
-
-
+        print('shape predicted : ', predicted_temperature.shape)
         print(predicted_temperature)
-
-
-
-
-
-
-
-
-    def predict(self, data):
-        return ""

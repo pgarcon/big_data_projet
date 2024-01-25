@@ -38,12 +38,19 @@ class Mongodb:
         df = self.spark.read.format(self.format).load().drop('_id')
         df.show()
         return df
+    
 
+    def get30jours(self):
+        df = self.spark.read.format(self.format).load().drop('_id').toPandas().sort_values(by='dh_utc', ascending=False)
+        df = df[:30]
+        print("\n##### 30 jours ###### \n\n ", df)
+
+        return df
 
     def prepare_data(self):
         sdf = self.get_data()
 
-        sdf = sdf.withColumn('raining', when((col('avg_rain_1h') + col('avg_rain_3h')) > 0.5, True).otherwise(False))
+        #sdf = sdf.withColumn('raining', when((col('avg_rain_1h') + col('avg_rain_3h')) > 0.5, True).otherwise(False))
 
         return sdf.toPandas()
 
@@ -115,7 +122,7 @@ class Mongodb:
         data = Data(token=token, date_debut=date_deb, date_fin=date_f)
         response = data.requestAllStations()
 
-        print(response)
+        self.add_data(response)
 
         df_spark = self.spark.createDataFrame(response)
 
@@ -134,7 +141,7 @@ class Mongodb:
             F.avg('wind_gusts').alias('avg_wind_gusts')
         )
 
-        result_df = result_df.withColumn('raining', when((col('avg_rain_1h') + col('avg_rain_3h')) > 0.5, 1).otherwise(0))
+        
 
         return result_df.toPandas()
 

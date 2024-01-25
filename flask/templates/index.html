@@ -12,15 +12,13 @@
     </header>
 
     <main>
-        <div>
-            <h3>Hello world</h3>
-        </div>
-        <div>
-            <h3>Hello world</h3>
-        </div>
-        <div>
-            <h3>Hello world</h3>
-        </div>
+        <h1>Météo</h1>
+        <p>Les jours de la semaine :</p>
+        <ul>
+            {% for jour in jours_semaine %}
+                <li>{{ jour }}</li>
+            {% endfor %}
+        </ul>
     </main>
 
     <footer>

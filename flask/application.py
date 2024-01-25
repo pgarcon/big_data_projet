@@ -1,29 +1,29 @@
 from flask import Flask
 from flask import url_for
 from flask import render_template
+from datetime import datetime, timedelta
 from markupsafe import escape
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return 'index'
+    return 'Hello there'
 
-@app.route('/login')
-def login():
-    return 'login'
+# Fonction pour obtenir les trois jours suivant le jour actuel
+def jours_semaine_suivants():
+    jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+    aujourdhui = datetime.now().weekday()
+    jours_suivants = jours[aujourdhui:] + jours[:aujourdhui-1]
+    return jours_suivants[:4]
 
-@app.route('/hello/')
-@app.route('/hello/<name>')
-def hello(name=None):
-    return render_template('index.html', name=name)
+# Route pour afficher la météo
+@app.route('/meteo')
+def meteo():
+    jours_semaine = jours_semaine_suivants()
 
-@app.route('/user/<username>')
-def profile(username):
-    return f'{username}\'s profile'
+    return render_template('index.html', jours_semaine=jours_semaine)
 
-with app.test_request_context():
-    print(url_for('index'))
-    print(url_for('login'))
-    print(url_for('login', next='/'))
-    print(url_for('profile', username='John Doe'))
+
+if __name__ == '__main__':
+    app.run(debug=True, use_reloader=True)
