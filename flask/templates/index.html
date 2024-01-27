@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>ma page</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 </head>
 
 <body>
@@ -15,10 +16,88 @@
         <h1>Météo</h1>
         <p>Les jours de la semaine :</p>
         <ul>
-            {% for jour in jours_semaine %}
-                <li>{{ jour }}</li>
-            {% endfor %}
+            <li>{{ jours_semaine[0] }}</li>
+            <ul>
+                <li>Humidity : {{ prediction[0][0] }}</li>
+                <li>pressure : {{ prediction[0][1] }}</li>
+                <li>rain : {{ prediction[0][2] }}</li>
+                <li>temperature : {{ prediction[0][4] }}</li>
+                <li>Wind direction : {{ prediction[0][5] }}</li>
+                <li>Wind gusts : {{ prediction[0][6] }}</li>
+                <li>Wind speed : {{ prediction[0][7] }}</li>
+            </ul>
+            <li>{{ jours_semaine[1] }}</li>
+            <ul>
+                <li>Humidity : {{ prediction[1][0] }}</li>
+                <li>pressure : {{ prediction[1][1] }}</li>
+                <li>rain : {{ prediction[1][2] }}</li>
+                <li>temperature : {{ prediction[1][4] }}</li>
+                <li>Wind direction : {{ prediction[1][5] }}</li>
+                <li>Wind gusts : {{ prediction[1][6] }}</li>
+                <li>Wind speed : {{ prediction[1][7] }}</li>
+            </ul>
+            <li>{{ jours_semaine[2] }}</li>
+            <ul>
+                <li>Humidity : {{ prediction[2][0] }}</li>
+                <li>pressure : {{ prediction[2][1] }}</li>
+                <li>rain : {{ prediction[2][2] }}</li>
+                <li>temperature : {{ prediction[2][4] }}</li>
+                <li>Wind direction : {{ prediction[2][5] }}</li>
+                <li>Wind gusts : {{ prediction[2][6] }}</li>
+                <li>Wind speed : {{ prediction[2][7] }}</li>
+            </ul>
+            <li>{{ jours_semaine[3] }}</li>
+            <ul>
+                <li>Humidity : {{ prediction[3][0] }}</li>
+                <li>pressure : {{ prediction[3][1] }}</li>
+                <li>rain : {{ prediction[3][2] }}</li>
+                <li>temperature : {{ prediction[3][4] }}</li>
+                <li>Wind direction : {{ prediction[3][5] }}</li>
+                <li>Wind gusts : {{ prediction[3][6] }}</li>
+                <li>Wind speed : {{ prediction[3][7] }}</li>
+            </ul>
         </ul>
+
+        <p></p>
+
+        <h1>Graphique de température mensuelle</h1>
+        <canvas id="2023" width="400" height="200"></canvas>
+
+        <script>
+            function createLineChart(myChart, labels, values) {
+            var ctx = myChart.getContext("2d");
+            var lineChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "2023",
+                        data: values[0],
+                        fill: false,
+                        borderColor: "rgb(75, 172, 192)",
+                        linetension: 0.1
+                    },
+                    {
+                        label: "2022",
+                        data: values[1],
+                        fill: false,
+                        borderColor: "rgb(150, 100, 45)",
+                        linetension: 0.1
+                    }
+                ]
+                },
+                options: {
+                    responsive: false
+                }
+            });
+        }
+
+        // Utilisation de la fonction
+        var myChart = document.getElementById('2023');
+        var labels = {{ labels | safe }};
+        var values = {{ values | safe }};
+        createLineChart(myChart, labels, values);
+        </script>
     </main>
 
     <footer>

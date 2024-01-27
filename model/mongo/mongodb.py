@@ -4,6 +4,7 @@ from pyspark.sql import functions as F
 from pyspark.sql.functions import col, date_format, to_date, when
 from datetime import datetime, timedelta
 from model.data import Data
+import pandas as pd
 from pymongo import MongoClient
 
 
@@ -53,6 +54,32 @@ class Mongodb:
         #sdf = sdf.withColumn('raining', when((col('avg_rain_1h') + col('avg_rain_3h')) > 0.5, True).otherwise(False))
 
         return sdf.toPandas()
+    
+
+    def getDataPerMonth(self, years=2024):
+        df = self.get_data().toPandas()
+
+        df['dh_utc'] = pd.to_datetime(df['dh_utc'])
+
+
+        df = df[df['dh_utc'].dt.year == years]
+
+        # Extraire le mois et l'année et mettre à jour la colonne 'dh_utc'
+        df['dh_utc'] = df['dh_utc'].dt.to_period("M")
+
+        # Grouper par mois et calculer la moyenne
+        df_monthly_avg = df.groupby('dh_utc').mean()
+
+        # Réinitialiser l'index pour obtenir une colonne 'dh_utc'
+        df_monthly_avg.reset_index(inplace=True)
+
+        df_final = df_monthly_avg[['dh_utc', 'avg_temperature']]
+
+
+        print("#### data per month")
+        print(df_final)
+
+        return df_final
 
 
     

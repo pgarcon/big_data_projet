@@ -6,16 +6,17 @@ import pandas as pd
 db = mdb(port="27019", database="meteo", collection="meteo")
 db.connexion()
 df = db.get30jours()
+df2 = db.getDataPerMonth()
 
-pred = Prediction()
-pred.prepare_data()
+#pred = Prediction()
+#pred.prepare_data()
 #pred.train_model()
 
-pred.train_model()
+#pred.train_model()
 
 
 
-pred.predict(data=df)
+#pred.predict(data=df)
 
 
 
@@ -25,7 +26,7 @@ pred.predict(data=df)
 #db.requestOneYears(years="2022", token="LEx7auQCHnZ70jWWLTNkZD0lRzzg9Lq89vfkrwu9qCT2g4rpN0hQg")
 #df = db.request(date_deb="2024-01-17", date_f="2024-01-18", token="LEx7auQCHnZ70jWWLTNkZD0lRzzg9Lq89vfkrwu9qCT2g4rpN0hQg")
 
-#db.close_connection()
+db.close_connection()
 
 #print("\nPrédiction : ", pred.predict(df))
 

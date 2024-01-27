@@ -24,11 +24,10 @@ class Prediction:
         self.y_train = None
         self.filename = "model_mteo.pkl"
 
+    def prepare_data(self):
+
         # Connexion à la base de données
         self.mongo.connexion()
-
-
-    def prepare_data(self):
 
         data = self.mongo.prepare_data()
         self.mongo.close_connection()
@@ -104,21 +103,35 @@ class Prediction:
             regressor.add(Dropout(0.2))
             regressor.add(Dense(units = self.n_future * 8,activation='linear'))
             regressor.compile(optimizer='adam', loss='mean_squared_error',metrics=['acc'])
-            regressor.fit(self.x_train, self.y_train, epochs=15,batch_size=32 )
+            regressor.fit(self.x_train, self.y_train, epochs=25,batch_size=32 )
             
             self.model = regressor
 
             with open(self.filename, 'wb') as model_file:
                 pickle.dump(self.model, model_file)
+
+            with open("scaler.pkl", 'wb') as scalerfile:
+                pickle.dump(self.sc_test, scalerfile)
         else:
             with open(self.filename, 'rb') as model_file:
                 self.model = pickle.load(model_file)
+
+            with open("scaler.pkl", 'rb') as scalerfile:
+                self.sc_test = pickle.load(scalerfile)
+
+
+    def chargeModel(self):
+        print("### chargement du modèle ###")
+        with open(self.filename, 'rb') as model_file:
+                self.model = pickle.load(model_file)
+        with open("scaler.pkl", 'rb') as scalerfile:
+                self.sc_test = pickle.load(scalerfile)
 
 
 
     def predict(self, data=None):
         data = data.sort_values(by='dh_utc', ascending=True)
-        print("###### data to predict ##### \n", data)
+        #print("###### data to predict ##### \n", data)
         data = data.drop(['dh_utc'], axis=1)
 
         data = data.values.tolist()
@@ -139,3 +152,5 @@ class Prediction:
 
         print('shape predicted : ', predicted_temperature.shape)
         print(predicted_temperature)
+
+        return predicted_temperature
