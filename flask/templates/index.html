@@ -3,105 +3,244 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ma page</title>
+    <title>La Billy Station</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <link rel="stylesheet" href="static/styles.css">
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <header>
-        <h1>Welcome to La Billy's Station</h1>
-    </header>
 
-    <main>
-        <h1>Météo</h1>
-        <p>Les jours de la semaine :</p>
-        <ul>
-            <li>{{ jours_semaine[0] }}</li>
-            <ul>
-                <li>Humidity : {{ prediction[0][0] }}</li>
-                <li>pressure : {{ prediction[0][1] }}</li>
-                <li>rain : {{ prediction[0][2] }}</li>
-                <li>temperature : {{ prediction[0][4] }}</li>
-                <li>Wind direction : {{ prediction[0][5] }}</li>
-                <li>Wind gusts : {{ prediction[0][6] }}</li>
-                <li>Wind speed : {{ prediction[0][7] }}</li>
-            </ul>
-            <li>{{ jours_semaine[1] }}</li>
-            <ul>
-                <li>Humidity : {{ prediction[1][0] }}</li>
-                <li>pressure : {{ prediction[1][1] }}</li>
-                <li>rain : {{ prediction[1][2] }}</li>
-                <li>temperature : {{ prediction[1][4] }}</li>
-                <li>Wind direction : {{ prediction[1][5] }}</li>
-                <li>Wind gusts : {{ prediction[1][6] }}</li>
-                <li>Wind speed : {{ prediction[1][7] }}</li>
-            </ul>
-            <li>{{ jours_semaine[2] }}</li>
-            <ul>
-                <li>Humidity : {{ prediction[2][0] }}</li>
-                <li>pressure : {{ prediction[2][1] }}</li>
-                <li>rain : {{ prediction[2][2] }}</li>
-                <li>temperature : {{ prediction[2][4] }}</li>
-                <li>Wind direction : {{ prediction[2][5] }}</li>
-                <li>Wind gusts : {{ prediction[2][6] }}</li>
-                <li>Wind speed : {{ prediction[2][7] }}</li>
-            </ul>
-            <li>{{ jours_semaine[3] }}</li>
-            <ul>
-                <li>Humidity : {{ prediction[3][0] }}</li>
-                <li>pressure : {{ prediction[3][1] }}</li>
-                <li>rain : {{ prediction[3][2] }}</li>
-                <li>temperature : {{ prediction[3][4] }}</li>
-                <li>Wind direction : {{ prediction[3][5] }}</li>
-                <li>Wind gusts : {{ prediction[3][6] }}</li>
-                <li>Wind speed : {{ prediction[3][7] }}</li>
-            </ul>
-        </ul>
+    <div id="template">
+        <div id="left_bar">
 
-        <p></p>
+            <header>
+                <h1 id="title">La Billy's Station</h1>
+            </header>
 
-        <h1>Graphique de température mensuelle</h1>
-        <canvas id="2023" width="400" height="200"></canvas>
+            <nav>
+                <ul>
+                    <li class="menu_item"><a href="#" onclick="changeMenu(0)">Météo</a></li>
+                    <li class="menu_item"><a href="#" onclick="changeMenu(1)">Evolution des températures</a></li>
+                    <li class="menu_item"><a href="#" onclick="changeMenu(2)">Sources</a></li>
+                    <li class="menu_item"><a href="#" onclick="changeMenu(3)">Contacts</a></li>
+                </ul>
+            </nav>
 
-        <script>
-            function createLineChart(myChart, labels, values) {
-            var ctx = myChart.getContext("2d");
-            var lineChart = new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: "2023",
-                        data: values[0],
-                        fill: false,
-                        borderColor: "rgb(75, 172, 192)",
-                        linetension: 0.1
-                    },
-                    {
-                        label: "2022",
-                        data: values[1],
-                        fill: false,
-                        borderColor: "rgb(150, 100, 45)",
-                        linetension: 0.1
-                    }
-                ]
-                },
-                options: {
-                    responsive: false
-                }
-            });
-        }
+        </div>
 
-        // Utilisation de la fonction
-        var myChart = document.getElementById('2023');
-        var labels = {{ labels | safe }};
-        var values = {{ values | safe }};
-        createLineChart(myChart, labels, values);
-        </script>
-    </main>
+        <main>
+
+            <div id="page0" style="display: block">
+                <div class="page">
+                    <h1>Météo</h1>
+                </div>
+
+                <div id="day_menu">
+                    <a href="#" class="day_menu_item" onclick="changeDay(0)">{{ jours_semaine[0] }}</a>
+                    <a href="#" class="day_menu_item" onclick="changeDay(1)">{{ jours_semaine[1] }}</a>
+                    <a href="#" class="day_menu_item" onclick="changeDay(2)">{{ jours_semaine[2] }}</a>
+                    <a href="#" class="day_menu_item" onclick="changeDay(3)">{{ jours_semaine[3] }}</a>
+                </div>
+
+                <div id="dayContainer"> 
+                    {% set soleil = "https://usagif.com/wp-content/uploads/gifs/sun-41.gif" %}
+                    {% set pluie = "https://www.gifimili.com/gif/2018/03/nuage-pluie-dessin.gif" %}
+                    {% set couvert = "https://img.freepik.com/vecteurs-premium/nuage-soleil-dessin-anime-3d-icone-realiste-temps-mignon_363543-470.jpg" %}
+                    {% set neige = "https://thumbs.dreamstime.com/b/nuage-avec-les-flocons-de-neige-en-baisse-illustration-vecteur-d-isolement-sur-le-fond-clair-131144416.jpg" %}
+                    {% for jour in jours_semaine %}
+                        {% set i = loop.index0 %}
+                        <div class="day_meteo" id="day{{ i }}" style="display: {{ 'block' if i == 0 else 'none' }};">
+                            <div class="container_meteo">
+                                <div>
+                                    <p class="day">{{ jour }}</p>
+                                    <ul>
+                                        <li>Humidité : {{ prediction[i][0]|round(1) }}%</li>
+                                        <li>Pression : {{ prediction[i][1]|round(2) }} bar</li>
+                                        <li>Temperature : {{ prediction[i][4]|round(1) }} degrés</li>
+
+                                        {% if ( prediction[i][5] >= 0 or prediction[i][5] >= 337.5) and prediction[i][5] < 22.5 %}
+                                            <li>Direction du vent : Nord</li>
+                                        {% elif prediction[i][5] >= 22.5 and prediction[i][5] < 67.5 %}
+                                            <li>Direction du vent : Nord-Est</li>
+                                        {% elif prediction[i][5] >= 67.5 and prediction[i][5] < 112.5 %}
+                                            <li>Direction du vent : Est</li>
+                                        {% elif prediction[i][5] >= 112.5 and prediction[i][5] < 157.5 %}
+                                            <li>Direction du vent : Sud-Est</li>
+                                        {% elif prediction[i][5] >= 157.5 and prediction[i][5] < 202.5 %}
+                                            <li>Direction du vent : Sud</li>
+                                        {% elif prediction[i][5] >= 202.5 and prediction[i][5] < 247.5 %}
+                                            <li>Direction du vent : Sud-Ouest</li>
+                                        {% elif prediction[i][5] >= 247.5 and prediction[i][5] < 292.5 %}
+                                            <li>Direction du vent : Ouest</li>
+                                        {% elif prediction[i][5] >= 292.5 and prediction[i][5] < 337.5 %}
+                                            <li>Direction du vent : Nord-Ouest</li>
+                                        {% endif %}
+
+                                        <li>Rafale maximale du vents : {{ prediction[i][6]|round(2) }} km/h</li>
+                                        <li>Vitesse moyenne du vent : {{ prediction[i][7]|round(2) }} km/h</li>
+                                    </ul>
+                                </div>
+                                
+                                {% if prediction[i][2] > 0.5 or prediction[i][3] > 0.3 %}
+                                    <img class="img_meteo" src="{{ pluie }}" alt="Description alternative du GIF">
+
+                                    <script>
+                                        document.getElementById('day{{ i }}').style.backgroundColor = 'rgba(220, 220, 220, 0.5)';
+                                    </script>
+                                {% elif prediction[i][2] > 0.5 or prediction[i][3] > 0.1 and prediction[i][4] < 0 %}
+                                    <img class="img_meteo" src="{{ neige }}" alt="Description alternative du GIF">
+
+                                    <script>
+                                        document.getElementById('day{{ i }}').style.backgroundColor = 'white';
+                                    </script>
+                                {% elif prediction[i][0] > 0.60 and prediction[i][1] > 1000 and prediction[i][7] > 20 %}
+                                    <img class="img_meteo" src="{{ couvert }}" alt="Description alternative du GIF">
+
+                                    <script>
+                                        document.getElementById('day{{ i }}').style.backgroundColor = 'grey';
+                                    </script>
+                                {% else %}
+                                    <img class="img_meteo" src="{{ soleil }}" alt="Description alternative du GIF">
+
+                                    <script>
+                                        document.getElementById('day{{ i }}').style.backgroundColor = 'rgba(250, 250, 100, 1)';
+                                    </script>
+                                {% endif %}
+
+
+
+                                
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <!--
+                        soleil : https://lh3.googleusercontent.com/proxy/JXmzA8Adoz89-7x9w3tVqS0fn2mrZg3ptEdhSr5zZVlRSlHmqPu-zSuUNMhEDehg-RHcBusmo8npHs51MrRBuOEm7DN_0gHPCBV5r9Wu
+                        pluie : https://www.gifimili.com/gif/2018/03/nuage-pluie-dessin.gif
+                        petite pluie : https://lh3.googleusercontent.com/proxy/CH3Ut6JZgTeCH4FNyj7b988JVIfWOUhqjpsidzb5Cy8aGepzqde96E_jnblgkbyjLVvmeLoGQjdOewGwMEBaCACsb_m9KWLPUQjXlhleSFpeWN2vp8IcP0a1o9yF
+                        couvert : https://img.freepik.com/vecteurs-premium/nuage-soleil-dessin-anime-3d-icone-realiste-temps-mignon_363543-470.jpg
+                        neige : https://thumbs.dreamstime.com/b/nuage-avec-les-flocons-de-neige-en-baisse-illustration-vecteur-d-isolement-sur-le-fond-clair-131144416.jpg
+
+                    -->
+
+                    <div class="day_meteo" id="day1" style="display: None;">
+                    <p class="day">{{ jours_semaine[1] }}</p>
+                        <ul>
+                            <li>Humidity : {{ prediction[1][0] }}</li>
+                            <li>pressure : {{ prediction[1][1] }}</li>
+                            <li>rain : {{ prediction[1][2] }}</li>
+                            <li>temperature : {{ prediction[1][4] }}</li>
+                            <li>Wind direction : {{ prediction[1][5] }}</li>
+                            <li>Wind gusts : {{ prediction[1][6] }}</li>
+                            <li>Wind speed : {{ prediction[1][7] }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="day_meteo" id="day2" style="display: None;">
+                    <p class="day">{{ jours_semaine[2] }}</p>
+                        <ul>
+                            <li>Humidity : {{ prediction[2][0] }}</li>
+                            <li>pressure : {{ prediction[2][1] }}</li>
+                            <li>rain : {{ prediction[2][2] }}</li>
+                            <li>temperature : {{ prediction[2][4] }}</li>
+                            <li>Wind direction : {{ prediction[2][5] }}</li>
+                            <li>Wind gusts : {{ prediction[2][6] }}</li>
+                            <li>Wind speed : {{ prediction[2][7] }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="day_meteo" id="day3" style="display: None;">
+                    <p class="day">{{ jours_semaine[3] }}</p>
+                        <ul>
+                            <li>Humidity : {{ prediction[3][0] }}</li>
+                            <li>pressure : {{ prediction[3][1] }}</li>
+                            <li>rain : {{ prediction[3][2] }}</li>
+                            <li>temperature : {{ prediction[3][4] }}</li>
+                            <li>Wind direction : {{ prediction[3][5] }}</li>
+                            <li>Wind gusts : {{ prediction[3][6] }}</li>
+                            <li>Wind speed : {{ prediction[3][7] }}</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="page1" style="display: None">
+                <div class="page">
+                    <h1>Graphique de température mensuelle</h1>
+                </div>
+
+                <h1>2023</h1>
+                <canvas id="2023" width="1300" height="800"></canvas>
+
+                <script>
+                    // Utilisation de la fonction
+                    var myChart = document.getElementById('2023');
+                    var labels = {{ labels | safe }};
+                    var values = {{ values | safe }};
+                    createLineChart(myChart, labels, values[0]);
+                </script>
+
+        <h1>2022</h1>
+            <canvas id="2022" width="1300" height="800"></canvas>
+
+            
+            <script>
+                // Utilisation de la fonction
+                var myChart_2 = document.getElementById('2022');
+                var labels = {{ labels | safe }};
+                var values = {{ values | safe }};
+                createLineChart(myChart_2, labels, values[1]);
+            </script>
+
+        <h1>2021</h1>
+        <canvas id="2021" width="1300" height="800"></canvas>
+
+            
+                <script>
+                    // Utilisation de la fonction
+                    var myChart_3 = document.getElementById('2021');
+                    var labels = {{ labels | safe }};
+                    var values = {{ values | safe }};
+                    createLineChart(myChart_3, labels, values[2]);
+                </script>
+
+
+        <h1>2020</h1>
+            <canvas id="2020" width="1300" height="800"></canvas>
+
+            
+            <script>
+                // Utilisation de la fonction
+                var myChart_4 = document.getElementById('2020');
+                var labels = {{ labels | safe }};
+                var values = {{ values | safe }};
+                createLineChart(myChart_4, labels, values[3]);
+            </script>
+
+            </div>
+
+            <div id="page2" style="display: None">
+                <p>les donnée ont été récupéré grâce à l'API <a href="https://www.infoclimat.fr/">InfoClimat</a>. 
+                    Elles utilisent une moyenne des données des stations pour prédire les différentes variables des 4 jours suivants.
+                </p>
+            </div>
+        
+            <div id="page3" style="display: None">
+                <p>Développeur : Pierre GARCON</p>
+            </div>
+        
+        </main>
+
+    </div>
 
     <footer>
-        <p>&copy; 2024 Your App</p>
+        <p>&copy; 2024 La Billy Station</p>
     </footer>
 </body>
 

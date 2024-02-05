@@ -1,0 +1,145 @@
+
+/*
+    LA PAGE
+*/
+
+body {
+    margin: 0px; 
+}
+
+/*
+    Menu de gauche
+*/
+
+#title {
+    color: black;
+    font-size: 3em;
+    font-family: 'Quicksand', sans-serif;
+}
+
+header {
+    text-align: center;
+}
+
+#template {
+    display: flex;
+    flex-direction: row;
+}
+
+nav {
+    margin-top: 6em;
+    font-size: 1.8em;
+    min-height: 75vh;
+}
+
+.menu_item {
+    margin-top: 0.5em;
+}
+
+.menu_item a{
+    padding: 5px;
+    color: black; 
+    text-decoration: none; 
+    display: block; 
+    width: 400px; 
+    text-align: left; 
+    transition: 0.5s;
+}
+
+.menu_item a:hover{
+    border-left: 8px solid;
+    border-color: brown;
+    background-color: rgb(225, 225, 225);
+}
+
+ul {
+    list-style: none;
+}
+
+#left_bar {
+    margin-right: 3em;
+    background-color: rgb(220, 219, 250);
+}
+
+
+/*
+    Les informations
+*/
+
+
+main {
+    flex-grow: 1; 
+    padding: 1em; 
+}
+
+.page {
+    text-align: center;
+    border-bottom: 2px solid
+}
+
+.page h1{
+    font-size: 4em;
+    font-family: "Bebas Neue", sans-serif;
+}
+
+#day_menu {
+    display: flex;
+    justify-content: space-between;
+    padding: 0; 
+    list-style: none; 
+}
+
+.day_menu_item {
+    flex: 1; 
+    margin: 15px; 
+    padding: 0.2em;
+    text-align: center; 
+    text-decoration: none; 
+    color: black; 
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    background-color: rgb(200, 200, 200);
+    transition: 0.5s;
+}
+
+.day_menu_item:hover {
+    background-color: rgb(95, 10, 10);
+    border-radius: 15%;
+    color: white;
+}
+
+/*
+    JOURS METEOS
+*/
+
+.day_meteo ul li{
+    font-size: 2.2em;
+    padding: 0.3em;
+}
+
+.day {
+    font-size: 3em;
+}
+
+.container_meteo{
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between; /* Ajouter cette propriété pour séparer les éléments horizontalement */
+    align-items: center; /* Facultatif : aligner les éléments verticalement au centre */
+}
+
+.container_meteo img{
+    padding:0 0 0 6em;
+    margin: 0;
+    max-width: 100%;
+}
+
+.container_meteo div{
+    padding-right:8em;
+    margin: 0;
+    max-width: 100%;
+}
+
+.img_meteo {
+    width: 30em;
+}

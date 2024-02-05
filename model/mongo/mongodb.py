@@ -37,13 +37,16 @@ class Mongodb:
     
     def get_data(self):
         df = self.spark.read.format(self.format).load().drop('_id')
+        df = df.drop_duplicates(subset=['dh_utc'])
         df.show()
         return df
     
 
     def get30jours(self):
-        df = self.spark.read.format(self.format).load().drop('_id').toPandas().sort_values(by='dh_utc', ascending=False)
+        df = self.spark.read.format(self.format).load().drop('_id').toPandas().sort_values(by='dh_utc', ascending=True)
+        df = df.drop_duplicates(subset='dh_utc', keep='last')
         df = df[:30]
+        df = df.reset_index(drop=True)
         print("\n##### 30 jours ###### \n\n ", df)
 
         return df
@@ -73,13 +76,23 @@ class Mongodb:
         # Réinitialiser l'index pour obtenir une colonne 'dh_utc'
         df_monthly_avg.reset_index(inplace=True)
 
-        df_final = df_monthly_avg[['dh_utc', 'avg_temperature']]
+        df_temperature = df_monthly_avg[['dh_utc', 'avg_temperature']]
+        df_presure = df_monthly_avg[['dh_utc', 'avg_pressure']]
+        df_humidity = df_monthly_avg[['dh_utc', 'avg_humidity']]
+        df_rain = df_monthly_avg[['dh_utc', 'avg_rain_1h', 'avg_rain_3h']]
+
+        df_rain['rain'] = (df_rain['avg_rain_1h'] + 3*df_rain['avg_rain_3h']) / 4
+
+        df_rain = df_rain[['dh_utc', 'rain']]
 
 
         print("#### data per month")
-        print(df_final)
+        print(df_temperature)
+        print(df_presure)
+        print(df_humidity)
+        print(df_rain)
 
-        return df_final
+        return df_temperature, df_presure, df_humidity, df_rain
 
 
     
@@ -143,6 +156,8 @@ class Mongodb:
             # Incrémente les dates de 2 jours pour la prochaine requête
             date_debut += timedelta(days=2)
             date_fin = date_debut + timedelta(days=2)
+
+
 
 
     def request(self, date_deb=None, date_f=None, token=None):

@@ -9,6 +9,7 @@ import numpy as np
 import os
 import tensorflow as tf
 import warnings
+from sklearn.metrics import mean_squared_error
 
 
 warnings.filterwarnings("ignore", category=UserWarning, module="keras")
@@ -93,17 +94,17 @@ class Prediction:
     def train_model(self): 
         if not(os.path.exists(self.filename)):
             regressor = Sequential()
-            regressor.add(Bidirectional(LSTM(units=30, return_sequences=True, input_shape = (self.x_train.shape[1],1) ) ))
+            regressor.add(Bidirectional(LSTM(units=150, return_sequences=True, input_shape = (self.x_train.shape[1],1) ) ))
+            regressor.add(Dropout(0.1))
+            regressor.add(LSTM(units= 100 , return_sequences=True))
             regressor.add(Dropout(0.2))
-            regressor.add(LSTM(units= 30 , return_sequences=True))
-            regressor.add(Dropout(0.2))
-            regressor.add(LSTM(units= 30 , return_sequences=True))
-            regressor.add(Dropout(0.2))
-            regressor.add(LSTM(units= 30))
+            regressor.add(LSTM(units= 80 , return_sequences=True))
+            regressor.add(Dropout(0.1))
+            regressor.add(LSTM(units= 100))
             regressor.add(Dropout(0.2))
             regressor.add(Dense(units = self.n_future * 8,activation='linear'))
             regressor.compile(optimizer='adam', loss='mean_squared_error',metrics=['acc'])
-            regressor.fit(self.x_train, self.y_train, epochs=25,batch_size=32 )
+            regressor.fit(self.x_train, self.y_train, epochs=20,batch_size=64 )
             
             self.model = regressor
 
@@ -127,11 +128,18 @@ class Prediction:
         with open("scaler.pkl", 'rb') as scalerfile:
                 self.sc_test = pickle.load(scalerfile)
 
+    def evaluate(self):
+        predicted_temperature = self.model.predict(self.x_test)
+
+        mse = mean_squared_error(self.y_test, predicted_temperature)
+        print(f'Mean Squared Error: {mse}')
+
+
 
 
     def predict(self, data=None):
         data = data.sort_values(by='dh_utc', ascending=True)
-        #print("###### data to predict ##### \n", data)
+        print("###### data to predict ##### \n", data)
         data = data.drop(['dh_utc'], axis=1)
 
         data = data.values.tolist()
